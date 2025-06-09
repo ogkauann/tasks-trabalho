@@ -1,7 +1,162 @@
+:root {
+    --background-color: #EEE;
+    --text-color: #333;
+    --card-background: #FFF;
+    --border-color: #DDD;
+    --hover-color: #F5F5F5;
+}
+
+[data-theme="dark"] {
+    --background-color: #1a1a1a;
+    --text-color: #FFF;
+    --card-background: #2d2d2d;
+    --border-color: #404040;
+    --hover-color: #3d3d3d;
+}
+
 body {
-    background-color: #EEE;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card, .table, .modal-content {
+    background-color: var(--card-background);
+    border-color: var(--border-color);
+}
+
+.table td, .table th {
+    color: var(--text-color);
+}
+
+.btn-light {
+    background-color: var(--card-background);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-light:hover {
+    background-color: var(--hover-color);
 }
 
 .material-icons {
     vertical-align: sub;
+}
+
+/* Estilo para o botão de alternar tema */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 10px;
+    border-radius: 50%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.theme-toggle:hover {
+    background-color: var(--hover-color);
+}
+
+/* Estilos adicionais para o dark mode */
+
+/* Navbar / Cabeçalho */
+.row.align-items-center {
+    background-color: var(--background-color);
+}
+
+.row.align-items-center .btn-outline-dark {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.row.align-items-center .btn-outline-dark:hover {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+}
+
+/* Campo de busca */
+.form-control {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.form-control::placeholder {
+    color: var(--text-color);
+}
+
+/* Tabela */
+.table-dark {
+    --bs-table-bg: var(--card-background);
+    --bs-table-color: var(--text-color);
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > * {
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: var(--hover-color);
+}
+
+/* Linhas de divisão */
+hr {
+    border-color: var(--border-color);
+}
+
+/* Offcanvas (Menu lateral de cadastro) */
+.offcanvas {
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+.offcanvas-header {
+    border-bottom-color: var(--border-color);
+}
+
+.offcanvas-title {
+    color: var(--text-color);
+}
+
+/* Botão de fechar do offcanvas */
+.btn-close {
+    filter: invert(var(--filter-invert-value, 0));
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1);
+}
+
+/* Estilos para labels e inputs dentro do offcanvas */
+.offcanvas-body label {
+    color: var(--text-color);
+}
+
+.offcanvas-body .form-control,
+.offcanvas-body .form-select {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.offcanvas-body .form-control::placeholder {
+    color: var(--text-color);
+}
+
+.offcanvas-body .form-select option {
+    background-color: var(--card-background);
+    color: var(--text-color);
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,7 +33,7 @@
         <a class="btn btn-outline-dark" href="pedidos.html">
             <i class="material-icons">shopping_cart</i>Pedidos
         </a>
-        <a class="btn btn-outline-danger" href="index.html">
+        <a class="btn btn-outline-danger" href="#" data-bs-toggle="modal" data-bs-target="#confirmLogoutModal">
             <i class="material-icons">logout</i> Sair
         </a>
 
@@ -49,9 +49,8 @@
         </span>
     </div>
 
-    <div>
-        <hr>
-        <input id="busca" oninput="buscar()" type="text" class="form-control mb-3" placeholder="Digite aqui">
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Buscar clientes...">
     </div>
 
         
@@ -95,23 +94,249 @@
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#ID</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Endereço</th>
-                <th>Observação</th>
+                <th data-column="id">#ID <span class="material-icons sort-icon"></span></th>
+                <th data-column="nome">Nome <span class="material-icons sort-icon"></span></th>
+                <th data-column="email">Email <span class="material-icons sort-icon"></span></th>
+                <th data-column="telefone">Telefone <span class="material-icons sort-icon"></span></th>
+                <th data-column="endereco">Endereço <span class="material-icons sort-icon"></span></th>
+                <th data-column="observacao">Observação <span class="material-icons sort-icon"></span></th>
                 <th>Ações</th>
             </tr>
         </thead>
-        <tbody id="tabela-clientes">
+        <tbody id="clientes-tbody">
         </tbody>
     </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <button id="prevPage" class="btn btn-secondary" disabled>Anterior</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" class="btn btn-secondary">Próximo</button>
+    </div>
 </section>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script src="js/clientes.js"></script>
+
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span class="material-icons">dark_mode</span>
+    </button>
+
+    <!-- Modal de Confirmação de Saída -->
+<div class="modal fade" id="confirmLogoutModal" tabindex="-1" aria-labelledby="confirmLogoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmLogoutModalLabel">Confirmação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja sair?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+        <button type="button" class="btn btn-danger" id="confirmLogoutBtn">Sim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script>
+        // Variáveis de paginação
+        let currentPage = 1;
+        const itemsPerPage = 10; // 10 registros por página
+
+        function renderTabela(clientesParaExibir) {
+            const tbody = document.getElementById('clientes-tbody');
+            tbody.innerHTML = '';
+
+            // Lógica de paginação
+            const totalPages = Math.ceil(clientesParaExibir.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const clientesPaginados = clientesParaExibir.slice(startIndex, endIndex);
+
+            clientesPaginados.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente.id}</td>
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.email}</td>
+                    <td>${cliente.telefone}</td>
+                    <td>${cliente.endereco}</td>
+                    <td>${cliente.observacao}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="#" class="btn btn-sm btn-danger">Excluir</a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Atualiza informações de paginação e estado dos botões
+            document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages} (${clientesParaExibir.length} registros)`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Variáveis para controlar a ordenação
+        let currentSortColumn = null;
+        let currentSortOrder = 'asc'; // 'asc' ou 'desc'
+
+        // Função para aplicar a ordenação
+        function applySorting(clientesArray, column, order) {
+            clientesArray.sort((a, b) => {
+                let valA = a[column];
+                let valB = b[column];
+
+                // Conversão para números para ordenação numérica
+                if (typeof valA === 'string' && !isNaN(parseFloat(valA)) && isFinite(valA) &&
+                    typeof valB === 'string' && !isNaN(parseFloat(valB)) && isFinite(valB)) {
+                    valA = parseFloat(valA);
+                    valB = parseFloat(valB);
+                } else if (typeof valA === 'number' && typeof valB === 'number') {
+                    // Já são números, não precisa converter
+                } else {
+                    // Comparação de strings case-insensitive
+                    valA = String(valA).toLowerCase();
+                    valB = String(valB).toLowerCase();
+                }
+
+                if (valA < valB) {
+                    return order === 'asc' ? -1 : 1;
+                }
+                if (valA > valB) {
+                    return order === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+
+        // Função para atualizar os ícones de ordenação nos cabeçalhos da tabela
+        function updateSortIcons() {
+            document.querySelectorAll('th[data-column]').forEach(header => {
+                const icon = header.querySelector('.sort-icon');
+                if (icon) {
+                    if (header.getAttribute('data-column') === currentSortColumn) {
+                        icon.textContent = currentSortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                    } else {
+                        icon.textContent = ''; // Limpa o ícone para outras colunas
+                    }
+                }
+            });
+        }
+
+        // Adiciona event listeners para as colunas da tabela para ordenação
+        document.querySelectorAll('th[data-column]').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-column');
+
+                if (currentSortColumn === column) {
+                    currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortColumn = column;
+                    currentSortOrder = 'asc'; // Padrão para ascendente ao mudar de coluna
+                }
+
+                updateSortIcons(); // Atualiza os ícones
+                currentPage = 1; // Volta para a primeira página ao mudar a ordenação
+                filterAndRender();
+            });
+        });
+
+        // Função centralizada para filtrar, ordenar e renderizar
+        function filterAndRender() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            let clientesFiltrados = clientes.filter(cliente => 
+                Object.values(cliente).some(valor =>
+                    String(valor).toLowerCase().includes(searchValue)
+                )
+            );
+
+            if (currentSortColumn) {
+                applySorting(clientesFiltrados, currentSortColumn, currentSortOrder);
+            }
+
+            renderTabela(clientesFiltrados);
+        }
+
+        // Adiciona event listener de busca
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            currentPage = 1; // Volta para a primeira página ao pesquisar
+            filterAndRender();
+        });
+
+        // Event listeners para os botões de paginação
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                filterAndRender();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            let clientesFiltrados = clientes.filter(cliente => 
+                Object.values(cliente).some(valor =>
+                    String(valor).toLowerCase().includes(searchValue)
+                )
+            );
+            const totalPages = Math.ceil(clientesFiltrados.length / itemsPerPage);
+
+            if (currentPage < totalPages) {
+                currentPage++;
+                filterAndRender();
+            }
+        });
+
+        // Renderiza todos ao carregar
+        filterAndRender();
+        updateSortIcons(); // Chamada inicial para limpar/definir ícones
+
+        // Função para alternar o tema
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Atualiza o ícone
+            const icon = document.querySelector('.theme-toggle .material-icons');
+            icon.textContent = newTheme === 'light' ? 'dark_mode' : 'light_mode';
+        }
+
+        // Verifica o tema salvo ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.querySelector('.theme-toggle .material-icons');
+            icon.textContent = savedTheme === 'light' ? 'dark_mode' : 'light_mode';
+
+            // Adiciona event listener para o botão 'Sim' da modal de logout
+            document.getElementById('confirmLogoutBtn').addEventListener('click', () => {
+                window.location.href = 'index.html'; // Redireciona para a página de login
+            });
+        });
+
+        // Exemplo de validação de formulários Bootstrap
+        (function () {
+          'use strict'
+
+          // Selecione o formulário que queremos validar
+          const form = document.querySelector('.needs-validation')
+
+          // Ouve o evento de 'submit' e previne o envio se houver campos inválidos
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+
+            form.classList.add('was-validated')
+          }, false)
+        })()
+    </script>
 </body>
 </html>
