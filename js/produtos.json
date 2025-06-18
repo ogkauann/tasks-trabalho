@@ -1,0 +1,12 @@
+[
+  {"id": 1, "nome": "Arroz 5kg", "preco": 22.90, "quantidade": 50},
+  {"id": 2, "nome": "Feijão 1kg", "preco": 8.50, "quantidade": 80},
+  {"id": 3, "nome": "Óleo 900ml", "preco": 7.99, "quantidade": 60},
+  {"id": 4, "nome": "Açúcar 1kg", "preco": 4.20, "quantidade": 70},
+  {"id": 5, "nome": "Café 500g", "preco": 15.00, "quantidade": 40},
+  {"id": 6, "nome": "Macarrão 500g", "preco": 3.80, "quantidade": 90},
+  {"id": 7, "nome": "Leite 1L", "preco": 5.60, "quantidade": 100},
+  {"id": 8, "nome": "Farinha de Trigo 1kg", "preco": 6.30, "quantidade": 55},
+  {"id": 9, "nome": "Sal 1kg", "preco": 2.50, "quantidade": 120},
+  {"id": 10, "nome": "Biscoito 400g", "preco": 4.90, "quantidade": 75}
+] 
