@@ -185,11 +185,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="js/produtos.js"></script>
 <script>
     // Variáveis de paginação
     let currentPage = 1;
     const itemsPerPage = 10; // 10 registros por página
+    let produtos = [];
 
     function renderTabela(produtosParaExibir) {
         const tbody = document.getElementById('produtos-tbody');
@@ -206,11 +206,11 @@
             tr.innerHTML = `
                 <td>${produto.id}</td>
                 <td>${produto.nome}</td>
-                <td>${produto.descricao}</td>
+                <td>${produto.descricao ? produto.descricao : '-'}</td>
                 <td>${produto.quantidade}</td>
-                <td>${produto.tipo}</td>
+                <td>${produto.tipo ? produto.tipo : '-'}</td>
                 <td>R$ ${produto.preco.toFixed(2)}</td>
-                <td><img src="${produto.imagem}" width="60px" alt="${produto.nome}"></td>
+                <td>${produto.imagem ? `<img src="${produto.imagem}" width="60px" alt="${produto.nome}">` : '-'}</td>
                 <td>
                     <button class="btn btn-sm btn-primary" onclick="editarProduto(${produto.id})">
                         <i class="material-icons">edit</i>
@@ -228,6 +228,17 @@
         document.getElementById('prevPage').disabled = currentPage === 1;
         document.getElementById('nextPage').disabled = currentPage === totalPages;
     }
+
+    // Buscar produtos do JSON local ao carregar a página
+    fetch('js/produtos.json')
+        .then(response => response.json())
+        .then(data => {
+            produtos = data;
+            renderTabela(produtos);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar produtos:', error);
+        });
 
     // Event listeners para paginação
     document.getElementById('prevPage').addEventListener('click', () => {
@@ -249,9 +260,9 @@
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         const produtosFiltrados = produtos.filter(produto => 
-            produto.nome.toLowerCase().includes(searchTerm) ||
-            produto.descricao.toLowerCase().includes(searchTerm) ||
-            produto.tipo.toLowerCase().includes(searchTerm)
+            (produto.nome && produto.nome.toLowerCase().includes(searchTerm)) ||
+            (produto.descricao && produto.descricao.toLowerCase().includes(searchTerm)) ||
+            (produto.tipo && produto.tipo.toLowerCase().includes(searchTerm))
         );
         currentPage = 1; // Reset para primeira página ao buscar
         renderTabela(produtosFiltrados);
@@ -269,8 +280,8 @@
             
             // Ordenar produtos
             produtos.sort((a, b) => {
-                const aValue = a[column].toString().toLowerCase();
-                const bValue = b[column].toString().toLowerCase();
+                const aValue = a[column] ? a[column].toString().toLowerCase() : '';
+                const bValue = b[column] ? b[column].toString().toLowerCase() : '';
                 return isAsc ? 
                     bValue.localeCompare(aValue) : 
                     aValue.localeCompare(bValue);
